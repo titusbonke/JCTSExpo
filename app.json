@@ -20,9 +20,10 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#1e90ff"
       },
-      "package": "com.sathyatechnosoft.jcts"
+      "package": "com.sathyatechnosoft.jcts",
+      "versionCode": 2
     },
     "web": {
       "favicon": "./assets/favicon.png"
