@@ -23,7 +23,7 @@
         "backgroundColor": "#1e90ff"
       },
       "package": "com.sathyatechnosoft.jcts",
-      "versionCode": 2
+      "versionCode": 3
     },
     "web": {
       "favicon": "./assets/favicon.png"
