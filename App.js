@@ -5,20 +5,54 @@ import ErrorBoundary from "./ErrorBoundary";
 import NetInfo from '@react-native-community/netinfo';
 import * as Linking from 'expo-linking';
 import { TouchableOpacity, Image } from 'react-native';
+import { Updates } from 'expo';
 import Constants from 'expo-constants';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
 
 const App = () => {
-  var AppUrl = 'https://jcts.org/';
   const [isLoading, setIsLoading] = useState(true);
   const [GoBack, setGoBack] = useState(true);
-  // const [url, setUrl] = useState('https://mobile.sathya.one/');
-  const [url, setUrl] = useState();
+  const [url, setUrl] = useState('https://jcts.org/');
+  // const [url, setUrl] = useState('https://beta.sathya.in/test-product-3');
   const [isConnected, setIsConnected] = useState(true);
   const GoBackRef = useRef(GoBack);
   const webViewRef = useRef(null);
   const fadeAnim = useRef(new Animated.Value(0)).current;
+
+
+
+
+  // const checkForAppUpdate = async () => {
+  //   try {
+  //     const { isAvailable } = await Updates.checkForUpdateAsync();
+  //     if (isAvailable) {
+  //       Alert.alert(
+  //         'Update Available',
+  //         'A new version of the app is available. Do you want to update now?',
+  //         [
+  //           {
+  //             text: 'Cancel',
+  //             style: 'cancel',
+  //           },
+  //           {
+  //             text: 'Update',
+  //             onPress: async () => {
+  //               await Updates.fetchUpdateAsync();
+  //               await Updates.reloadAsync();
+  //             },
+  //           },
+  //         ],
+  //       );
+  //     } else {
+  //       // No update available
+  //     }
+  //   } catch (error) {
+  //     console.error('Error checking for app update:', error);
+  //   }
+  // };
+
+
+
+
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
@@ -43,37 +77,6 @@ const App = () => {
   }, []);
 
 
-
-
-  // Storing a variable
-  const storeVariable = async (Key, Value) => {
-    try {
-      await AsyncStorage.setItem(Key, Value);
-      console.log('Variable stored successfully.');
-    } catch (error) {
-      console.error('Error storing variable:', error);
-    }
-  };
-
-  // Retrieving a variable
-  const getVariable = async (Key) => {
-    try {
-      return await AsyncStorage.getItem(Key);
-    } catch (error) {
-      console.error('Error retrieving variable:', error);
-      return null;
-    }
-  };
-
-
-  // Linking.addEventListener('url', (event) => {
-  //   const parsedUrl = new URL(event.url);
-  //   console.log(parsedUrl);
-  //   // Use the parameters in your app logic
-  // });
-  
-
-
   const handleBackPress = () => {
     if (webViewRef.current && GoBackRef.current) {
       webViewRef.current.goBack();
@@ -93,7 +96,7 @@ const App = () => {
           'Are you sure you want to exit?',
           [
             { text: 'Cancel', onPress: () => null },
-            { text: 'Exit', onPress: () => {clearData();BackHandler.exitApp();} },
+            { text: 'Exit', onPress: () => BackHandler.exitApp() },
           ],
           { cancelable: false }
         );
@@ -101,11 +104,6 @@ const App = () => {
       return true;
     }
     return true;
-  };
-
-  const clearData = async () => {
-    await webViewRef.current.clearCache(true);
-    // await webViewRef.current.clearCookies();
   };
 
 
@@ -141,37 +139,30 @@ const App = () => {
   };
 
 
-
   const onShouldStartLoadWithRequest = (event) => {
     // Get the URL from the request event
-    const { url, navigationType  } = event;
-    setIsLoading(true);
+    const { url, navigationType } = event;
+
     console.log(url);
     // console.log(event);
     // checkForAppUpdate();
 
-    if (Platform.OS === 'ios') {
-      if (!url.startsWith('http')) {
+    // if (Platform.OS === 'ios') {
+      if (!url.startsWith('https')) {
         // Set the new URL in state
         console.log("hit");
         Linking.openURL(url);
         webViewRef.current.stopLoading();
         return false;
       }
-    }
+    // }
 
     fetch(url, { method: 'HEAD' })
       .then((response) => {
         const contentDisposition = response.headers.get('content-disposition');
         if (contentDisposition && contentDisposition.toLowerCase().includes('attachment')) {
-          
-          webViewRef.current.stopLoading();
-          // console.log(response)
-          // response.headers.set('content-type','application/pdf');
-          // // console.log(response);
-          // setUrl(url);
-          // // console.log(response.headers);
           Linking.openURL(url);
+          webViewRef.current.stopLoading();
           return false;
         }
       })
@@ -186,41 +177,28 @@ const App = () => {
     //   setUrl("https://play.google.com/store/apps/details?id=com.sathyatechnosoft.sathya.one");
     //   return false;
     // }
-    if (url.includes("/Transaction/SelectPrinter")) {
-      Linking.openURL(url);
-      return false;
-    }
 
-    if (url.includes("CheckVersion")) {
+    if (url.includes("Dashboard")) {
       const appVersion = Constants.manifest.version;
       if (!url.includes("version")) {
         if (url.includes("?")) {
           // console.log('App Version:', appVersion);    
-          var TempUrl = url + "&version1=" + appVersion + "&ios="+(Platform.OS === 'ios');
+          TempUrl = url + "&version1=" + appVersion+"&Ios="+(Platform.OS === 'ios');
           setUrl(TempUrl);
           return false;
         }
         else {
-          var TempUrl = url + "?version=" + appVersion + "&ios="+(Platform.OS === 'ios');
+          TempUrl = url + "?version=" + appVersion+"&Ios="+(Platform.OS === 'ios');
           setUrl(TempUrl);
           return false;
         }
       }
     }
 
-    if (url.includes("https://console.circle7.robeeta.com/signin?code=")) {
-      var TempUrl = url.replace("console.circle7.robeeta.com", "mobile.circle7.robeeta.com");
-      // console.log(TempUrl);
-      storeVariable("CodeUrl",TempUrl);
-      // console.log("Retrived url : "+ getVariable("CodeUrl"))
-      setUrl(TempUrl);
-      return false;
-    }
 
-    if (url.includes("/SignOut")) {
-      AsyncStorage.clear();
-      return true;
-    }
+
+
+
 
     if (url.endsWith('UpdateVersion')) {
       // Set the new URL in state
@@ -230,7 +208,7 @@ const App = () => {
         [
           {
             text: 'Update', onPress: () => {
-              if (Platform.OS === 'ios') Linking.openURL("https://apps.apple.com/us/app/sathya-one/id6450176182");
+              if (Platform.OS === 'ios') Linking.openURL("https://apps.apple.com/us/app/jcts/id6450176182");
               else Linking.openURL("https://play.google.com/store/apps/details?id=com.sathyatechnosoft.jcts");
             }
           },
@@ -245,28 +223,7 @@ const App = () => {
     return true;
   };
 
-  const handleMessage = (event) => {
-    // Display the message received from the WebView
-    console.log(event);
-    alert(event.nativeEvent.data);
-  };
 
-  function UrlCheck() {
-    try {
-      if (url==undefined) {
-        const variableValue = getVariable("CodeUrl").then(a => {
-          console.log('Value:', a);
-          var CodeUrl = a??AppUrl;
-          setUrl(CodeUrl);
-          return url;
-        });
-      }
-      else return url;
-    } catch (error) {
-      console.error('Error:', error);
-    }
-
-  }
 
   return (
     <ErrorBoundary>
@@ -282,19 +239,18 @@ const App = () => {
             </TouchableOpacity> : ""
           }
           <WebView
-            source={{ uri: UrlCheck() }}
+            source={{ uri: url }}
             onLoadProgress={onLoadProgress}
             onShouldStartLoadWithRequest={onShouldStartLoadWithRequest}
             onNavigationStateChange={onNavigationStateChange}
-            {...(Platform.OS === 'ios' ? { originWhitelist: ['*'] } : {})}
-            headers={{ 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3','content-type':'application/pdf'}}
-            onError={(e) => { console.log(e) }}
+            // {...(Platform.OS === 'ios' ? { originWhitelist: ['*'] } : {})}
+            // headers={{ 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3' }}
+            onError={(e) => { console.error("error :" + e) }}
             javaScriptEnabled={true}
             ref={webViewRef}
             setSupportMultipleWindows={false}
-            onMessage={handleMessage}
-            onFileDownload={(e) => { console.log("test") }}
-            domStorageEnabled ={true}
+            originWhitelist={['*']}
+
           />
           {isLoading && (
             <Animated.View style={[styles.LoadingView, { opacity: fadeAnim }]}>
